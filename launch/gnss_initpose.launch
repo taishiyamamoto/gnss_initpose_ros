@@ -1,0 +1,4 @@
+<launch>
+    <rosparam file="$(find gnss_initpose_ros)/config/gnss_initpose_node.yaml" command="load"/>
+    <node pkg="gnss_initpose_ros" type="gnss_initpose_node" name="gnss_initpose_node" output="screen" respawn="false" respawn_delay="0" />
+</launch>

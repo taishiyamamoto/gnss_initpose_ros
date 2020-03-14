@@ -1,0 +1,10 @@
+gnss_initpose_node:
+    map_frame: "map"
+    base_frame: "base_link"
+    gnss_topic: "fix"
+    point_topic: "initial_pose"
+    latlong_param: "+proj=latlong +ellps=WGS84"
+    coord_param: "+init=epsg:2451"
+    map_lat: 35.6886 #deg
+    map_long: 140.0202 #deg
+    map_frame_direction: 0 #deg

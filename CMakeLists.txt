@@ -13,10 +13,12 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   std_msgs
   tf
+  tf2_ros
 )
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
+# find_package(PROJ REQUIRED)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -120,6 +122,7 @@ catkin_package(
 include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
+  #/usr/include
 )
 
 ## Declare a C++ library
@@ -137,6 +140,8 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/gnss_initpose_ros_node.cpp)
 
+add_executable(gnss_initpose_node src/gnss_initpose_node.cpp)
+
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -151,6 +156,11 @@ include_directories(
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
+
+target_link_libraries(gnss_initpose_node 
+  ${catkin_LIBRARIES}
+  proj
+)
 
 #############
 ## Install ##
