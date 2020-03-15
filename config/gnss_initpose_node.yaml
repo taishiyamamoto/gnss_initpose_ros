@@ -1,6 +1,7 @@
 gnss_initpose_node:
     map_frame: "map"
     base_frame: "base_link"
+    publish_tf: false
     gnss_topic: "fix"
     point_topic: "initial_pose"
     latlong_param: "+proj=latlong +ellps=WGS84"

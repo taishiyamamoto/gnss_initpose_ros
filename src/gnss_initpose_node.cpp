@@ -2,7 +2,7 @@
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <geometry_msgs/TransformStamped.h>
 #include <sensor_msgs/NavSatFix.h>
-#include <std_srvs/Empty.h>
+#include <std_srvs/Trigger.h>
 #include <tf/transform_broadcaster.h>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_ros/transform_broadcaster.h>
@@ -31,13 +31,13 @@ private:
     geometry_msgs::TransformStamped transformStamped;
     geometry_msgs::PoseWithCovarianceStamped pose;
 
-
     string base_frame_, map_frame_;
     string gnss_topic_, point_topic_;
+    bool publish_tf_;
 
     void gnss_cb(const sensor_msgs::NavSatFixConstPtr& gnss_msg);
-    void send_pose(const double latitude, const double longitude);
-    void srv_cb(std_srvs::Empty::Request &req, std_srvs::Empty::Response &res);
+    bool send_pose(const double latitude, const double longitude);
+    bool srv_cb(std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res);
 
     projPJ pj_latlong_, pj_coord_;
     double map_lat_, map_long_, map_x_, map_y_;
@@ -46,16 +46,17 @@ private:
     string latlong_param_, coord_param_;
 
 public:
-    gnss_initpose_node(/* args */);
+    gnss_initpose_node();
     ~gnss_initpose_node();
 };
 
-gnss_initpose_node::gnss_initpose_node(/* args */)
+gnss_initpose_node::gnss_initpose_node()
 {
     ros::NodeHandle pnh_("~");
 
     pnh_.param<string>("map_frame",map_frame_,"map");
     pnh_.param<string>("base_frame",base_frame_,"base_link");
+    pnh_.param<bool>("publish_tf",publish_tf_,false);
     pnh_.param<string>("gnss_topic",gnss_topic_,"fix");   
     pnh_.param<string>("point_topic",point_topic_,"initial_pose");
     pnh_.param<string>("latlong_param",latlong_param_,"+proj=latlong +ellps=WGS84");
@@ -66,6 +67,7 @@ gnss_initpose_node::gnss_initpose_node(/* args */)
 
     sub_ = nh_.subscribe<sensor_msgs::NavSatFix>(gnss_topic_,1,&gnss_initpose_node::gnss_cb,this);
     pub_ = nh_.advertise<geometry_msgs::PoseWithCovarianceStamped>(point_topic_,1);
+    srv_ = nh_.advertiseService("gnss_initpose",&gnss_initpose_node::srv_cb,this);
 
     if(!(pj_latlong_ = pj_init_plus(latlong_param_.c_str()))){
         ROS_ERROR("Exception Parameter latlong_param = %s",latlong_param_.c_str());
@@ -103,7 +105,7 @@ gnss_initpose_node::gnss_cb(const sensor_msgs::NavSatFixConstPtr& gnss_msg){
     robot_long_ = gnss_msg->longitude;
 }
 
-void 
+bool 
 gnss_initpose_node::send_pose(const double latitude, const double longitude){
 
     robot_x_ = longitude * DEG_TO_RAD;
@@ -115,18 +117,22 @@ gnss_initpose_node::send_pose(const double latitude, const double longitude){
         ROS_ERROR("ERROR DETECTED pj_transform()");
         ROS_ERROR("ERROR_CODE = %d",p);
         ROS_ERROR("ERROR DETAIL = %s",pj_strerrno(p));
-    return;
+    return false;
     }
+
+    robot_x_ -= map_x_;
+    robot_y_ -= map_y_;
 
     //Rotation matrix2d
     robot_x_ = cos(map_frame_direction_) * robot_x_ - sin(map_frame_direction_) * robot_y_;
     robot_y_ = sin(map_frame_direction_) * robot_x_ + sin(map_frame_direction_) * robot_y_;
 
+    if(publish_tf_){
     transformStamped.header.stamp = ros::Time::now();
     transformStamped.header.frame_id = map_frame_;
     transformStamped.child_frame_id = base_frame_;
-    transformStamped.transform.translation.x = robot_x_-map_x_;
-    transformStamped.transform.translation.y = robot_y_-map_y_;
+    transformStamped.transform.translation.x = robot_x_;
+    transformStamped.transform.translation.y = robot_y_;
     transformStamped.transform.translation.z = 0;
     tf2::Quaternion q;
     q.setRPY(0,0,0);
@@ -136,11 +142,13 @@ gnss_initpose_node::send_pose(const double latitude, const double longitude){
     transformStamped.transform.rotation.w = q.w();
 
     br_.sendTransform(transformStamped);
+    }
 
+    if(!publish_tf_){
     pose.header.stamp = ros::Time::now();
     pose.header.frame_id = base_frame_;
-    pose.pose.pose.position.x = robot_x_-map_x_;
-    pose.pose.pose.position.y = robot_y_-map_y_;
+    pose.pose.pose.position.x = robot_x_;
+    pose.pose.pose.position.y = robot_y_;
     pose.pose.pose.position.z = 0;
     pose.pose.pose.orientation.x = 0;
     pose.pose.pose.orientation.y = 0;
@@ -148,13 +156,16 @@ gnss_initpose_node::send_pose(const double latitude, const double longitude){
     pose.pose.pose.orientation.w = 1;
 
     pub_.publish(pose);
-
+    }
+    return true;
 }
 
-void
-gnss_initpose_node::srv_cb(std_srvs::Empty::Request &req, std_srvs::Empty::Response &res){
-    send_pose(robot_lat_,robot_long_);
+bool
+gnss_initpose_node::srv_cb(std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res){
 
+    res.success = send_pose(robot_lat_,robot_long_);
+
+    return res.success;
 }
 
 int main(int argc, char** argv){
