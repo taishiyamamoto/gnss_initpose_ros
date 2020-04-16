@@ -3,7 +3,6 @@
 #include <geometry_msgs/TransformStamped.h>
 #include <sensor_msgs/NavSatFix.h>
 #include <std_srvs/Trigger.h>
-#include <tf/transform_broadcaster.h>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_ros/transform_broadcaster.h>
 
@@ -124,8 +123,10 @@ gnss_initpose_node::send_pose(const double latitude, const double longitude){
     robot_y_ -= map_y_;
 
     //Rotation matrix2d
-    robot_x_ = cos(map_frame_direction_) * robot_x_ - sin(map_frame_direction_) * robot_y_;
-    robot_y_ = sin(map_frame_direction_) * robot_x_ + sin(map_frame_direction_) * robot_y_;
+    robot_x_ = cos(map_frame_direction_*DEG_TO_RAD) * robot_x_ - sin(map_frame_direction_*DEG_TO_RAD) * robot_y_;
+    robot_y_ = sin(map_frame_direction_*DEG_TO_RAD) * robot_x_ + sin(map_frame_direction_*DEG_TO_RAD) * robot_y_;
+
+    ROS_INFO("robot_x=%lf,robot_y=%lf",robot_x_,robot_y_);
 
     if(publish_tf_){
     transformStamped.header.stamp = ros::Time::now();
@@ -146,7 +147,7 @@ gnss_initpose_node::send_pose(const double latitude, const double longitude){
 
     if(!publish_tf_){
     pose.header.stamp = ros::Time::now();
-    pose.header.frame_id = base_frame_;
+    pose.header.frame_id = map_frame_;
     pose.pose.pose.position.x = robot_x_;
     pose.pose.pose.position.y = robot_y_;
     pose.pose.pose.position.z = 0;
