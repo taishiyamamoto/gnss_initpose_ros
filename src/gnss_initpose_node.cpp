@@ -124,7 +124,7 @@ gnss_initpose_node::send_pose(const double latitude, const double longitude){
 
     //Rotation matrix2d
     robot_x_ = cos(map_frame_direction_*DEG_TO_RAD) * robot_x_ - sin(map_frame_direction_*DEG_TO_RAD) * robot_y_;
-    robot_y_ = sin(map_frame_direction_*DEG_TO_RAD) * robot_x_ + sin(map_frame_direction_*DEG_TO_RAD) * robot_y_;
+    robot_y_ = sin(map_frame_direction_*DEG_TO_RAD) * robot_x_ + cos(map_frame_direction_*DEG_TO_RAD) * robot_y_;
 
     ROS_INFO("robot_x=%lf,robot_y=%lf",robot_x_,robot_y_);
 

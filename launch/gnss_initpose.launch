@@ -1,4 +1,14 @@
 <launch>
+    <arg name="use_pointcloud_map" default="true" />
+    <arg name="map_pcd" if="$(arg use_pointcloud_map)" />
+
     <rosparam file="$(find gnss_initpose_ros)/config/gnss_initpose_node.yaml" command="load"/>
     <node pkg="gnss_initpose_ros" type="gnss_initpose_node" name="gnss_initpose_node" output="screen" respawn="false" respawn_delay="0" />
+<!--
+    <node pkg="pcl_ros" type="pcd_to_pointcloud" name="pcd_to_pointcloud" args="$(arg map_pcd)" if="$(arg use_pointcloud_map)">
+        <remap from="cloud_pcd" to="mapcloud" />
+	<param name="frame_id" value="map" />
+	<param name="latch" value="True" />
+    </node>
+-->
 </launch>

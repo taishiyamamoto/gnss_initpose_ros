@@ -6,6 +6,9 @@ gnss_initpose_node:
     point_topic: "initialpose"
     latlong_param: "+proj=latlong +ellps=WGS84"
     coord_param: "+init=epsg:2451"
-    map_lat: 35.6897 #deg
-    map_long: 140.02138 #deg
-    map_frame_direction: 0 #deg
+    map_lat: 35.68863335 #deg
+    map_long: 140.02025925 #deg
+    map_frame_direction: 180 #deg
+    
+    #tsudanumacampass_cycleport
+    #35.69037871,140.02069082
