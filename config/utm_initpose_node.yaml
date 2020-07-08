@@ -1,0 +1,10 @@
+utm_initpose_node:
+    map_frame: "map"
+    base_frame: "base_footprint"
+    utm_topic: "gps/odom"
+    initial_pose_topic: "initialpose"
+    gps_pose_topic: "gps/position"
+    datum: [411351.102, 3949856.427, 4.71239]  #lat=35.68863335, long=140.02025925, deg = 270
+    
+    #tsudanumacampass_cycleport
+    #35.69037871,140.02069082

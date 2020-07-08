@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
   std_msgs
+  nav_msgs
   std_srvs
   tf2_ros
 )
@@ -141,6 +142,7 @@ include_directories(
 # add_executable(${PROJECT_NAME}_node src/gnss_initpose_ros_node.cpp)
 
 add_executable(gnss_initpose_node src/gnss_initpose_node.cpp)
+add_executable(utm_initpose_node src/utm_initpose_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -160,6 +162,10 @@ add_executable(gnss_initpose_node src/gnss_initpose_node.cpp)
 target_link_libraries(gnss_initpose_node 
   ${catkin_LIBRARIES}
   proj
+)
+
+target_link_libraries(utm_initpose_node 
+  ${catkin_LIBRARIES}
 )
 
 #############
