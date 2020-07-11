@@ -99,7 +99,7 @@
         robot_pose_.pose.pose.orientation.y = 0;
         robot_pose_.pose.pose.orientation.z = 0;
         robot_pose_.pose.pose.orientation.w = 1;
-        robot_pose_.pose.covariance = world_pose_.pose.covariance;
+        //robot_pose_.pose.covariance = world_pose_.pose.covariance;
     }
 
     bool
