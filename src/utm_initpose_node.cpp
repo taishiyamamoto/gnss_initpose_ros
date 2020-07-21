@@ -78,6 +78,7 @@
         world_pose_.pose = utm_msg->pose;
 
         trans_coord();
+        robot_pose_.pose.covariance = world_pose_.pose.covariance;
         robot_pose_.header.stamp = ros::Time::now();
         robot_pose_.header.frame_id = map_frame_;
         pub2_.publish(robot_pose_);
